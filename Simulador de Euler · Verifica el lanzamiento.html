@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Simulador de Euler · Verifica el lanzamiento</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #fff;
+      --tx: #1b2033;
+      --mu: #5d6580;
+      --ac: #3b5bdb;
+      --ok: #1c8a4b;
+      --bad: #c92a2a;
+      --bd: #dde1ee;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+    }
+
+    @media(prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #12141f;
+        --card: #1b1f31;
+        --tx: #e8eaf5;
+        --mu: #9aa3c0;
+        --ac: #7c9cff;
+        --ok: #4cd08a;
+        --bad: #ff7b7b;
+        --bd: #2c3250
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #12141f;
+      --card: #1b1f31;
+      --tx: #e8eaf5;
+      --mu: #9aa3c0;
+      --ac: #7c9cff;
+      --ok: #4cd08a;
+      --bad: #ff7b7b;
+      --bd: #2c3250
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--tx);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 16px
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin: .2em 0
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin: 0 0 .6em
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 14px 0
+    }
+
+    .mu {
+      color: var(--mu);
+      font-size: .92rem
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr 1fr
+    }
+
+    @media(max-width:760px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0
+    }
+
+    button {
+      font: inherit;
+      border: 1px solid var(--bd);
+      background: var(--card);
+      color: var(--tx);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer
+    }
+
+    button.on {
+      background: var(--ac);
+      color: #fff;
+      border-color: var(--ac)
+    }
+
+    label {
+      display: inline-flex;
+      flex-direction: column;
+      font-size: .85rem;
+      color: var(--mu);
+      margin: 0 10px 8px 0
+    }
+
+    input[type=number] {
+      width: 90px;
+      font: inherit;
+      padding: 6px;
+      border: 1px solid var(--bd);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--tx)
+    }
+
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px
+    }
+
+    .kpi div {
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      padding: 8px
+    }
+
+    .kpi b {
+      display: block;
+      font-size: 1.15rem
+    }
+
+    .badge {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-top: 10px
+    }
+
+    .badge.ok {
+      background: rgba(28, 138, 75, .15);
+      color: var(--ok)
+    }
+
+    .badge.bad {
+      background: rgba(201, 42, 42, .15);
+      color: var(--bad)
+    }
+
+    canvas {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+      background: var(--bg)
+    }
+
+    .sc {
+      overflow-x: auto
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: .85rem;
+      font-variant-numeric: tabular-nums
+    }
+
+    th,
+    td {
+      padding: 4px 8px;
+      text-align: right;
+      border-bottom: 1px solid var(--bd);
+      white-space: nowrap
+    }
+
+    th {
+      color: var(--mu)
+    }
+
+    td.g {
+      color: var(--ok)
+    }
+
+    td.r {
+      color: var(--bad)
+    }
+
+    input[type=range] {
+      width: 100%
+    }
+
+    details {
+      margin: 6px 0
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600
+    }
+  </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&display=swap">
+  <style>
+    :root:root:root {
+      --bg: #070b1f;
+      --card: rgba(14, 22, 58, .82);
+      --tx: #e6ecff;
+      --mu: #93a0cf;
+      --ac: #2de2e6;
+      --ok: #3ddc97;
+      --bad: #ff5d73;
+      --bd: #2b3a7a
+    }
+
+    body {
+      background: radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 78% 32%, #fff, transparent), radial-gradient(1.5px 1.5px at 46% 74%, #cfe, transparent), radial-gradient(1px 1px at 90% 88%, #fff, transparent), radial-gradient(ellipse at 50% -20%, #22338f, #070b1f 65%) fixed, #070b1f
+    }
+
+    h1,
+    h2,
+    button,
+    .kpi b,
+    .mc {
+      font-family: Orbitron, system-ui, sans-serif
+    }
+
+    h1 {
+      font-size: 1.7rem;
+      letter-spacing: .04em;
+      background: linear-gradient(90deg, #7df9ff, #ffb703);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    h2 {
+      color: var(--ac);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-size: .95rem
+    }
+
+    .mc {
+      letter-spacing: .22em;
+      font-size: .72rem;
+      color: var(--ok)
+    }
+
+    .card {
+      box-shadow: 0 0 26px rgba(45, 226, 230, .1);
+      backdrop-filter: blur(4px)
+    }
+
+    canvas {
+      border: 1px solid var(--bd);
+      box-shadow: 0 0 18px rgba(45, 226, 230, .18)
+    }
+
+    button {
+      background: #0d1a4a;
+      border: 1px solid #2de2e6;
+      color: #bff;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: .8rem;
+      letter-spacing: .04em;
+      transition: .15s
+    }
+
+    button:hover {
+      box-shadow: 0 0 14px rgba(45, 226, 230, .6)
+    }
+
+    button.on {
+      background: linear-gradient(90deg, #2de2e6, #4d8dff);
+      color: #04102e;
+      border-color: transparent;
+      box-shadow: 0 0 16px rgba(45, 226, 230, .7);
+      font-weight: 800
+    }
+
+    .launch {
+      flex: 1;
+      background: linear-gradient(90deg, #ff6b35, #ffb703);
+      color: #1a1020;
+      border: 0;
+      font-weight: 800;
+      font-size: .95rem;
+      padding: 13px;
+      box-shadow: 0 0 22px rgba(255, 140, 40, .6)
+    }
+
+    .kpi div {
+      background: rgba(6, 12, 38, .75);
+      border-left: 3px solid var(--ac)
+    }
+
+    .kpi b {
+      color: #7df9ff;
+      text-shadow: 0 0 8px rgba(45, 226, 230, .5);
+      font-size: 1rem
+    }
+
+    input[type=number] {
+      background: #0a1236;
+      color: #7df9ff;
+      border-color: var(--bd)
+    }
+
+    :root:root:root {
+      --bg: #2a2e35;
+      --card: #3b4049;
+      --tx: #e3e6ea;
+      --mu: #aab2bd;
+      --ac: #6fd3ff;
+      --ok: #4be08a;
+      --bad: #ff6b6b;
+      --bd: #1d2026
+    }
+
+    body {
+      background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .03) 0 2px, transparent 2px 7px), #2a2e35
+    }
+
+    h1 {
+      background: none;
+      -webkit-text-fill-color: #eef1f5;
+      color: #eef1f5;
+      text-shadow: 0 2px 0 #14171b
+    }
+
+    .card {
+      position: relative;
+      backdrop-filter: none;
+      background: linear-gradient(145deg, #474d58, #343941);
+      border: 2px solid #1d2026;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 6px 16px rgba(0, 0, 0, .45)
+    }
+
+    .card::before {
+      --s: radial-gradient(circle at 35% 30%, #eee, #777 55%, #333);
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: var(--s) 7px 7px/9px 9px no-repeat, var(--s) calc(100% - 7px) 7px/9px 9px no-repeat, var(--s) 7px calc(100% - 7px)/9px 9px no-repeat, var(--s) calc(100% - 7px) calc(100% - 7px)/9px 9px no-repeat
+    }
+
+    h2 {
+      display: inline-block;
+      background: #1f2328;
+      color: #ffd27a;
+      padding: 5px 12px;
+      border-radius: 4px;
+      border: 1px solid #101215;
+      box-shadow: inset 0 0 6px #000;
+      font-size: .78rem;
+      margin: 0 0 .8em
+    }
+
+    button {
+      background: linear-gradient(#5d6470, #3e434c);
+      border: 1px solid #14171b;
+      border-radius: 8px;
+      color: #eceff3;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 3px 0 #14171b
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 1px 0 #14171b
+    }
+
+    button.on {
+      background: linear-gradient(#58e592, #1f9a52);
+      color: #05210f;
+      box-shadow: 0 0 14px rgba(75, 224, 138, .65), inset 0 1px 0 rgba(255, 255, 255, .5), 0 3px 0 #14171b
+    }
+
+    .launch {
+      background: radial-gradient(circle at 35% 25%, #7cf5a6, #1c9a4c 75%);
+      color: #04210f;
+      box-shadow: 0 0 16px rgba(75, 224, 138, .5), 0 4px 0 #0c4a25
+    }
+
+    #rst {
+      background: radial-gradient(circle at 35% 25%, #ff9a9a, #c0262d 75%);
+      color: #fff;
+      box-shadow: 0 4px 0 #5e1217
+    }
+
+    input[type=number] {
+      background: #14171b;
+      color: #ffd27a;
+      border: 2px inset #23272d;
+      font-family: "Courier New", monospace
+    }
+
+    .kpi div {
+      background: #10161a;
+      border: 2px solid #1c2024;
+      border-radius: 6px;
+      box-shadow: inset 0 0 12px #000;
+      color: #8fa0ad
+    }
+
+    .kpi b {
+      font-family: "Courier New", monospace;
+      color: #7dffa6;
+      text-shadow: 0 0 6px rgba(125, 255, 166, .4);
+      font-size: 1.05rem
+    }
+
+    canvas {
+      border: 3px solid #1c1f24;
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 1px #555
+    }
+
+    input[type=range] {
+      accent-color: #ffd27a
+    }
+
+    .inst {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 10px 0
+    }
+
+    .inst canvas {
+      width: 48%;
+      max-width: 170px;
+      height: auto;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      border-radius: 50%
+    }
+
+    .lamps {
+      font-size: .75rem;
+      color: var(--mu);
+      text-align: center;
+      font-family: Orbitron, system-ui, sans-serif;
+      margin-bottom: 8px
+    }
+
+    .lamp {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #777, #222);
+      border: 2px solid #111;
+      vertical-align: middle;
+      margin: 0 6px 0 14px
+    }
+
+    .lamp.g {
+      background: radial-gradient(circle at 35% 30%, #c6ffd9, #1fbf5b 70%);
+      box-shadow: 0 0 12px #3ddc97
+    }
+
+    .lamp.r {
+      background: radial-gradient(circle at 35% 30%, #ffb0b0, #d6303a 70%);
+      box-shadow: 0 0 12px #ff5d73
+    }
+
+    .lamp.y {
+      background: radial-gradient(circle at 35% 30%, #ffe9a0, #f0a500 70%);
+      box-shadow: 0 0 12px #ffc233
+    }
+
+    .dials {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin: 6px 0 14px
+    }
+
+    .dial {
+      width: 132px;
+      text-align: center
+    }
+
+    .dial canvas {
+      width: 132px;
+      height: 132px;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      border-radius: 50%;
+      touch-action: none;
+      cursor: grab
+    }
+
+    .dl {
+      font: 600 .62rem Orbitron, system-ui, sans-serif;
+      color: var(--mu);
+      letter-spacing: .08em;
+      margin-top: 2px
+    }
+
+    .vs {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 96px;
+      background: #20242a;
+      border: 2px inset #2b3037;
+      border-radius: 8px;
+      padding: 8px 4px
+    }
+
+    .vs span {
+      font: 600 .58rem Orbitron, system-ui, sans-serif;
+      color: var(--mu);
+      text-align: center
+    }
+
+    .vs b {
+      font-family: "Courier New", monospace;
+      color: #7dffa6;
+      font-size: .9rem
+    }
+
+    input.vr {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      height: 110px;
+      width: 26px;
+      accent-color: #ff8a3d
+    }
+
+    #mb button,
+    #sb button {
+      --c: #888;
+      display: inline-flex;
+      align-items: center;
+      padding: 11px 18px;
+      border-radius: 999px;
+      border: 2px solid #14171b;
+      color: #fff;
+      text-shadow: 0 1px 2px #000;
+      background: radial-gradient(circle at 30% 22%, rgba(255, 255, 255, .5), transparent 42%), var(--c);
+      box-shadow: 0 4px 0 #14171b, inset 0 -4px 8px rgba(0, 0, 0, .35);
+      opacity: .72
+    }
+
+    #mb button::before,
+    #sb button::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #1b1f24;
+      margin-right: 9px;
+      box-shadow: inset 0 0 2px #000
+    }
+
+    #mb button.on,
+    #sb button.on {
+      opacity: 1;
+      color: #fff;
+      background: radial-gradient(circle at 30% 22%, rgba(255, 255, 255, .55), transparent 42%), var(--c);
+      box-shadow: 0 0 20px var(--c), 0 2px 0 #14171b, inset 0 -4px 8px rgba(0, 0, 0, .25);
+      transform: translateY(2px)
+    }
+
+    #mb button.on::before,
+    #sb button.on::before {
+      background: #fff;
+      box-shadow: 0 0 8px #fff
+    }
+
+    #mb button:nth-child(1) {
+      --c: #e0393e
+    }
+
+    #mb button:nth-child(2) {
+      --c: #2f7de0
+    }
+
+    #mb button:nth-child(3) {
+      --c: #e6a100
+    }
+
+    #sb button:nth-child(1) {
+      --c: #e0393e
+    }
+
+    #sb button:nth-child(2) {
+      --c: #e6a100
+    }
+
+    #sb button:nth-child(3) {
+      --c: #2fa860
+    }
+
+    #sb button:nth-child(4) {
+      --c: #2f7de0
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+
+    <div class="mc">👨‍🚀 CENTRO DE CONTROL · MISIÓN EULER-1</div>
+    <h1>🚀 Verifica el lanzamiento con el método de Euler</h1>
+    <p class="mu">Eres responsable de comprobar los cálculos antes del despegue. Elige el paso de integración y
+      comprueba si la aproximación cumple los límites de error.</p>
+
+    <div class="card">
+      <h2>Conexión con la película</h2>
+      <p>En <i>Talentos ocultos</i> (<i>Hidden Figures</i>), Katherine Johnson calcula trayectorias para la NASA. Antes
+        del vuelo orbital de John Glenn en 1962, él pidió que ella verificara a mano los números de la computadora. Los
+        métodos numéricos como Euler aproximan ecuaciones diferenciales paso a paso, y esas aproximaciones traen error:
+        de ahí que verificar fuera cuestión de vida o muerte.</p>
+      <p class="mu">Modelo: el cohete asciende en vertical con aceleración neta <b>dv/dt = a − g − k·v</b> y <b>dh/dt =
+          v</b>, con v(0)=0 y h(0)=0. (a = empuje/masa, g = gravedad, k = resistencia lineal.) Euler: v<sub>n+1</sub> =
+        v<sub>n</sub> + Δt·f(t<sub>n</sub>, v<sub>n</sub>).</p>
+    </div>
+
+    <div class="card">
+      <h2>¿Qué significa cada valor?</h2>
+      <ul style="margin:0;padding-left:20px">
+        <li><b>t</b>: tiempo transcurrido desde el despegue (s).</li>
+        <li><b>h</b>: altura del cohete sobre el suelo (m). Su derivada es la velocidad: dh/dt = v.</li>
+        <li><b>v</b>: velocidad vertical del cohete (m/s).</li>
+        <li><b>a = T/m</b>: aceleración que produce el motor, es decir, el empuje (fuerza del motor) dividido entre la
+          masa (m/s²). No es la velocidad.</li>
+        <li><b>g</b>: gravedad, que frena el ascenso (m/s²).</li>
+        <li><b>k</b>: resistencia del aire; cuanto mayor es, más se frena el cohete al ir más rápido (1/s).</li>
+        <li><b>v₀, h₀</b>: valores iniciales. El cohete parte del reposo y del suelo: v₀ = 0 m/s y h₀ = 0 m.</li>
+        <li><b>Δt</b>: paso de integración, cada cuántos segundos recalcula Euler. Iteraciones n = tiempo final / Δt.
+        </li>
+        <li><b>Error</b>: diferencia absoluta entre el valor de Euler y el valor exacto. Las <b>tolerancias</b> son el
+          error máximo aceptado.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>🛰️ Panel de control: parámetros y método</h2>
+      <div class="mu" style="margin-bottom:6px">Arrastra las perillas y las palancas; al soltar, la simulación se lanza
+        sola.</div>
+      <div class="dials" id="dials"></div>
+      <label>a = T/m (m/s²)<input type="number" id="a" value="15" step="0.1"></label>
+      <label>g (m/s²)<input type="number" id="g" value="9.81" step="0.01"></label>
+      <label>k (1/s)<input type="number" id="k" value="0.1" step="0.01" min="0"></label>
+      <label>Tiempo final (s)<input type="number" id="T" value="20" step="1" min="1" max="120"></label>
+      <label>Tol. velocidad (m/s)<input type="number" id="tv" value="0.5" step="0.1"></label>
+      <label>Tol. altura (m)<input type="number" id="th" value="5" step="0.5"></label>
+      <div class="mu">Método (al elegirlo, la simulación se lanza sola)</div>
+      <div class="btns" id="mb"></div>
+      <div class="mu">Paso de integración Δt</div>
+      <div class="btns" id="sb"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Simulación del despegue</h2>
+        <canvas id="c3" width="420" height="500"></canvas>
+        <div class="btns"><button id="play" class="launch">▶ Ejecutar simulación</button><button id="rst">↺
+            Reiniciar</button></div>
+        <input type="range" id="tt" min="0" max="20" step="0.01" value="0">
+        <div class="kpi" style="margin-top:8px">
+          <div>t<b id="lt">0</b></div>
+          <div>Velocidad (Euler)<b id="lv">0</b></div>
+          <div>Altura (Euler)<b id="lh">0</b></div>
+        </div>
+        <div class="inst"><canvas id="g1" width="170" height="170"></canvas><canvas id="g2" width="170"
+            height="170"></canvas></div>
+        <div class="lamps"><span class="lamp" id="l1"></span>EN VUELO<span class="lamp" id="l2"></span>ERROR v<span
+            class="lamp" id="l3"></span>ERROR h</div>
+        <p class="mu">El cohete usa la aproximación numérica y la línea punteada marca la altura exacta. El panel del
+          gráfico muestra los valores iniciales y los obtenidos en tiempo real. La simulación empieza solo al pulsar
+          «Ejecutar simulación».</p>
+      </div>
+
+      <div class="card">
+        <h2>Resultado a los <span id="tf">20</span> s</h2>
+        <div class="kpi" id="kp"></div>
+        <div id="bd" class="badge"></div>
+        <canvas id="c1" width="480" height="230" style="margin-top:12px"></canvas>
+        <canvas id="c2" width="480" height="230" style="margin-top:10px"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Comparación de métodos (mismo Δt)</h2>
+      <p class="mu">Errores absolutos al tiempo final. En verde si cumplen las tolerancias.</p>
+      <div class="sc">
+        <table id="cmp"></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Tabla de iteraciones</h2>
+      <div class="sc" style="max-height:340px;overflow-y:auto">
+        <table id="tb"></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Preguntas de reflexión</h2>
+      <details>
+        <summary>1. ¿Por qué importaba verificar los cálculos antes de enviar astronautas?</summary>
+        <p>Un error pequeño en la trayectoria se traduce en kilómetros de desvío o en un reingreso fallido. No había
+          margen para confiar a ciegas en un único cálculo.</p>
+      </details>
+      <details>
+        <summary>2. ¿Qué riesgos hay con un paso demasiado grande?</summary>
+        <p>El error local crece con Δt², y el global con Δt. Con pasos grandes se pierde información de cómo cambia la
+          solución y se pueden incumplir los márgenes de seguridad.</p>
+      </details>
+      <details>
+        <summary>3. ¿Por qué una aproximación parece razonable y aun así acumula error?</summary>
+        <p>Cada paso arrastra un pequeño error que se suma al siguiente. La gráfica se ve casi igual, pero la diferencia
+          final puede superar la tolerancia.</p>
+      </details>
+      <details>
+        <summary>4. ¿Qué variables reales no consideramos?</summary>
+        <p>Pérdida de masa por combustible, variación del empuje, gravedad según la altura, densidad del aire, viento,
+          rotación de la Tierra, etc.</p>
+      </details>
+      <details>
+        <summary>5. ¿Por qué una trayectoria lunar necesita un modelo más complejo?</summary>
+        <p>Es movimiento tridimensional con varios cuerpos (Tierra, Luna, Sol), gravedad variable y maniobras. Requiere
+          sistemas de ecuaciones y métodos de mayor orden.</p>
+      </details>
+    </div>
+  </main>
+  <script>
+    const $ = id => document.getElementById(id);
+    const STEPS = [2, 1, 0.5, 0.25], NAMES = { euler: "Euler", heun: "Heun", rk4: "RK4" };
+    let dt = 1, method = "euler", playing = false, last = 0, R = [], SP, started = false, cd = 0, cdi;
+    const fmt = (x, d = 4) => x.toLocaleString("es", { minimumFractionDigits: d, maximumFractionDigits: d });
+    const P = () => ({ a: +$("a").value, g: +$("g").value, k: Math.max(0, +$("k").value), T: Math.max(1, +$("T").value), tv: +$("tv").value, th: +$("th").value });
+    function ex(t, p) { const A = p.a - p.g, k = p.k; if (!k) return [A * t, A * t * t / 2]; const e = 1 - Math.exp(-k * t); return [A / k * e, A / k * (t - e / k)] }
+    const F = (s, p) => [p.a - p.g - p.k * s[0], s[0]];
+    const ad = (s, d, m) => [s[0] + d * m[0], s[1] + d * m[1]];
+    const M = {
+      euler: (s, d, p) => ad(s, d, F(s, p)),
+      heun: (s, d, p) => { const a = F(s, p), b = F(ad(s, d, a), p); return [s[0] + d / 2 * (a[0] + b[0]), s[1] + d / 2 * (a[1] + b[1])] },
+      rk4: (s, d, p) => { const a = F(s, p), b = F(ad(s, d / 2, a), p), c = F(ad(s, d / 2, b), p), e = F(ad(s, d, c), p); return [0, 1].map(i => s[i] + d / 6 * (a[i] + 2 * b[i] + 2 * c[i] + e[i])) }
+    };
+    function run(m, d, p) { const n = Math.round(p.T / d); let s = [0, 0]; const r = [{ t: 0, v: 0, h: 0 }]; for (let i = 1; i <= n; i++) { s = M[m](s, d, p); r.push({ t: i * d, v: s[0], h: s[1] }) } return r }
+    function mk(box, items, cur, cb, lab) { box.innerHTML = ""; items.forEach(x => { const b = document.createElement("button"); b.textContent = lab(x); if (x === cur) b.className = "on"; b.onclick = () => cb(x); box.appendChild(b) }) }
+    function gauge(id, val, max, lab) {
+      const cv = $(id), c = cv.getContext("2d"), W = cv.width, R = W / 2; c.clearRect(0, 0, W, W); c.save(); c.translate(R, R);
+      const g = c.createLinearGradient(-R, -R, R, R); g.addColorStop(0, "#d5d9de"); g.addColorStop(1, "#5d636d"); c.fillStyle = g; c.beginPath(); c.arc(0, 0, R - 3, 0, 7); c.fill();
+      c.fillStyle = "#12161b"; c.beginPath(); c.arc(0, 0, R - 11, 0, 7); c.fill();
+      const a0 = .75 * Math.PI, sw = 1.5 * Math.PI; c.strokeStyle = "#cfd6df"; c.fillStyle = "#cfd6df"; c.font = "10px system-ui"; c.textAlign = "center"; c.textBaseline = "middle";
+      for (let i = 0; i <= 10; i++) { const a = a0 + sw * i / 10, ca = Math.cos(a), sa = Math.sin(a); c.lineWidth = i % 5 ? 1 : 2; c.beginPath(); c.moveTo(ca * (R - 16), sa * (R - 16)); c.lineTo(ca * (R - 24), sa * (R - 24)); c.stroke(); if (i % 2 == 0) c.fillText(Math.round(max * i / 10), ca * (R - 36), sa * (R - 36)) }
+      c.fillStyle = "#9fb0c0"; c.fillText(lab, 0, R * .42);
+      const a = a0 + sw * Math.max(0, Math.min(1, val / max)); c.strokeStyle = "#ff7a2f"; c.lineWidth = 3; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * (R - 18), Math.sin(a) * (R - 18)); c.stroke();
+      c.fillStyle = "#8b929c"; c.beginPath(); c.arc(0, 0, 6, 0, 7); c.fill(); c.fillStyle = "#7dffa6"; c.font = "bold 12px monospace"; c.fillText(val.toFixed(1), 0, R * .66); c.restore()
+    }
+    function interp(t) { t = Math.max(0, t); const i = Math.min(R.length - 2, Math.floor(t / dt + 1e-9)), f = (t - R[i].t) / dt; return [R[i].v + f * (R[i + 1].v - R[i].v), R[i].h + f * (R[i + 1].h - R[i].h)] }
+    function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() }
+    function chart(cv, key, title, p) {
+      const c = cv.getContext("2d"), W = cv.width, H = cv.height, m = 40, T = p.T;
+      c.clearRect(0, 0, W, H); const ymax = ex(T, p)[key === "v" ? 0 : 1] * 1.1 || 1;
+      const X = t => m + t / T * (W - m - 10), Y = y => H - 28 - y / ymax * (H - 48);
+      c.font = "12px system-ui"; c.fillStyle = css("--mu"); c.strokeStyle = css("--bd");
+      for (let i = 0; i <= 4; i++) { const y = ymax * i / 4; c.beginPath(); c.moveTo(m, Y(y)); c.lineTo(W - 10, Y(y)); c.stroke(); c.fillText(y.toFixed(0), 4, Y(y) + 4) }
+      for (let i = 0; i <= 4; i++)c.fillText((T * i / 4).toFixed(0) + " s", X(T * i / 4) - 10, H - 10);
+      c.fillText(title, m + 6, 14);
+      c.strokeStyle = css("--ac"); c.lineWidth = 2; c.beginPath();
+      for (let i = 0; i <= 200; i++) { const t = T * i / 200, v = ex(t, p)[key === "v" ? 0 : 1]; i ? c.lineTo(X(t), Y(v)) : c.moveTo(X(t), Y(v)) } c.stroke();
+      c.strokeStyle = "#f08c00"; c.fillStyle = "#f08c00"; c.beginPath();
+      R.forEach((r, i) => { const y = Y(r[key]); i ? c.lineTo(X(r.t), y) : c.moveTo(X(r.t), y) }); c.stroke();
+      if (R.length <= 41) R.forEach(r => { c.beginPath(); c.arc(X(r.t), Y(r[key]), 2.5, 0, 7); c.fill() });
+      c.fillStyle = css("--ac"); c.fillText("— exacta", W - 170, 14); c.fillStyle = "#f08c00"; c.fillText("— " + NAMES[method], W - 95, 14);
+    }
+    function sceneOld(t) {
+      const p = SP, cv = $("c3"), c = cv.getContext("2d"), W = cv.width, H = cv.height;
+      const [v, h] = interp(t), he = ex(t, p)[1], hmax = Math.max(ex(p.T, p)[1], R[R.length - 1].h) * 1.1, gy = H - 40;
+      const Y = hh => gy - hh / hmax * (gy - 70);
+      const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#0b1030"); gr.addColorStop(1, "#4a6fd0"); c.fillStyle = gr; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; for (let i = 0; i < 30; i++)c.fillRect((i * 97) % W, (i * 53) % (H - 120), 1.5, 1.5);
+      c.fillStyle = "#2f7d3a"; c.fillRect(0, gy, W, 40);
+      c.setLineDash([6, 4]); c.strokeStyle = "#9be29b"; c.beginPath(); c.moveTo(0, Y(he)); c.lineTo(W, Y(he)); c.stroke(); c.setLineDash([]);
+      c.fillStyle = "#9be29b"; c.font = "12px system-ui"; c.textAlign = "right"; c.fillText("exacta: " + fmt(he, 1) + " m", W - 8, Y(he) - 4); c.textAlign = "left";
+      const x = W * 0.68, y = Y(h);
+      if (t > 0) { c.fillStyle = "#ffb703"; c.beginPath(); c.moveTo(x - 9, y); c.lineTo(x + 9, y); c.lineTo(x, y + 22 + Math.random() * 14 + v * 0.3); c.fill() }
+      c.fillStyle = "#e9ecef"; c.beginPath(); c.moveTo(x, y - 50); c.quadraticCurveTo(x + 16, y - 25, x + 14, y); c.lineTo(x - 14, y); c.quadraticCurveTo(x - 16, y - 25, x, y - 50); c.fill();
+      c.fillStyle = "#e8590c"; c.beginPath(); c.moveTo(x - 14, y); c.lineTo(x - 26, y + 10); c.lineTo(x - 12, y - 14); c.fill(); c.beginPath(); c.moveTo(x + 14, y); c.lineTo(x + 26, y + 10); c.lineTo(x + 12, y - 14); c.fill();
+      c.fillStyle = "#4dabf7"; c.beginPath(); c.arc(x, y - 28, 5, 0, 7); c.fill();
+      const ve = ex(t, p)[0], L = [["Valores iniciales", 1], ["v₀ = 0 m/s   h₀ = 0 m"], ["a = " + p.a + " m/s²   g = " + p.g + " m/s²"], ["k = " + p.k + " 1/s"], ["Δt = " + dt + " s · " + NAMES[method]], ["Valores en tiempo real", 1], ["t = " + fmt(t, 2) + " s"], ["v = " + fmt(v, 2) + " m/s"], ["h = " + fmt(h, 2) + " m"], ["v exacta = " + fmt(ve, 2) + " m/s"], ["Error de h = " + fmt(Math.abs(h - he), 2) + " m"]];
+      c.fillStyle = "rgba(8,12,35,.78)"; c.fillRect(6, 6, 172, L.length * 17 + 10); c.strokeStyle = "#2de2e6"; c.lineWidth = 1.5; c.strokeRect(6, 6, 172, L.length * 17 + 10);
+      L.forEach((l, i) => { c.fillStyle = l[1] ? "#ffd43b" : "#fff"; c.font = (l[1] ? "bold " : "") + "12px system-ui"; c.fillText(l[0], 12, 22 + i * 17) });
+      if (!started) { c.fillStyle = "#fff"; c.font = "bold 12px system-ui"; c.textAlign = "center"; c.fillText("Elige método y paso", W * .68, gy - 110); c.fillText("o pulsa «Ejecutar»", W * .68, gy - 92); c.textAlign = "left" }
+      if (started && cd > 0) { c.fillStyle = "#ffb703"; c.font = "bold 72px Orbitron,system-ui"; c.textAlign = "center"; c.fillText(cd, W * .68, gy - 120); c.textAlign = "left" }
+      const vm = Math.max(ex(p.T, p)[0], R[R.length - 1].v) * 1.1; gauge("g1", v, vm, "VEL m/s"); gauge("g2", h, hmax, "ALT m"); $("l1").className = "lamp" + (playing || cd > 0 ? " y" : "");
+      $("lt").textContent = fmt(t, 2) + " s"; $("lv").textContent = fmt(v, 2) + " m/s"; $("lh").textContent = fmt(h, 2) + " m";
+    }
+    function render() {
+      const p = P(); SP = p; R = run(method, dt, p); const f = R[R.length - 1], e = ex(p.T, p), ev = Math.abs(f.v - e[0]), eh = Math.abs(f.h - e[1]);
+      $("tf").textContent = p.T; $("tt").max = p.T; if (+$("tt").value > p.T) $("tt").value = p.T;
+      mk($("mb"), Object.keys(NAMES), method, x => { method = x; render(); launch() }, x => NAMES[x] + (x === "euler" ? " (principal)" : " (ampliación)"));
+      mk($("sb"), STEPS, dt, x => { dt = x; render(); launch() }, x => x.toString().replace(".", ",") + " s (" + Math.round(p.T / x) + " iter.)");
+      const okv = ev < p.tv, okh = eh < p.th;
+      $("kp").innerHTML = `<div>Velocidad calculada<b>${fmt(f.v)} m/s</b></div><div>Altura calculada<b>${fmt(f.h)} m</b></div><div>Velocidad exacta<b>${fmt(e[0])} m/s</b></div><div>Altura exacta<b>${fmt(e[1])} m</b></div><div>Error de velocidad (&lt; ${p.tv} m/s)<b style="color:var(${okv ? "--ok" : "--bad"})">${fmt(ev)}</b></div><div>Error de altura (&lt; ${p.th} m)<b style="color:var(${okh ? "--ok" : "--bad"})">${fmt(eh)}</b></div>`;
+      $("l2").className = "lamp " + (okv ? "g" : "r"); $("l3").className = "lamp " + (okh ? "g" : "r"); const b = $("bd"); b.className = "badge " + (okv && okh ? "ok" : "bad");
+      b.textContent = okv && okh ? "✅ Lanzamiento aprobado: ambos errores cumplen los requisitos." : "⚠️ La precisión todavía es insuficiente. Prueba un paso de integración menor.";
+      let h = "<tr><th>n</th><th>t (s)</th><th>v num.</th><th>v exacta</th><th>error v</th><th>h num.</th><th>h exacta</th><th>error h</th></tr>";
+      R.forEach((r, i) => { const x = ex(r.t, p); h += `<tr><td>${i}</td><td>${fmt(r.t, 2)}</td><td>${fmt(r.v)}</td><td>${fmt(x[0])}</td><td>${fmt(Math.abs(r.v - x[0]))}</td><td>${fmt(r.h)}</td><td>${fmt(x[1])}</td><td>${fmt(Math.abs(r.h - x[1]))}</td></tr>` });
+      $("tb").innerHTML = h;
+      let q = "<tr><th>Δt</th>" + Object.values(NAMES).map(n => `<th>${n}: err v</th><th>${n}: err h</th>`).join("") + "</tr>";
+      STEPS.forEach(d => { q += `<tr><td>${d}</td>`; Object.keys(NAMES).forEach(m => { const z = run(m, d, p), l = z[z.length - 1], a = Math.abs(l.v - e[0]), c = Math.abs(l.h - e[1]); q += `<td class="${a < p.tv ? "g" : "r"}">${fmt(a)}</td><td class="${c < p.th ? "g" : "r"}">${fmt(c)}</td>` }); q += "</tr>" });
+      $("cmp").innerHTML = q;
+      chart($("c1"), "v", "Velocidad v(t) [m/s]", p); chart($("c2"), "h", "Altura h(t) [m]", p); clearInterval(cdi); cd = 0; playing = false; started = false; $("tt").value = 0; $("tt").disabled = true; $("play").textContent = "▶ Ejecutar simulación"; scene(0);
+    }
+    function loop() {
+      if (!playing) return; const ts = performance.now(), p = SP; let t = Math.max(0, +$("tt").value + Math.min(100, Math.max(0, ts - last)) / 1000 * p.T / 8); last = ts;
+      if (t >= p.T) { t = p.T; playing = false; $("play").textContent = "▶ Ejecutar de nuevo" }
+      $("tt").value = t; scene(t); if (playing) requestAnimationFrame(loop)
+    }
+    $("play").onclick = () => {
+      if (playing) { playing = false; $("l1").className = "lamp"; $("play").textContent = "▶ Continuar"; return }
+      if (cd > 0) return; if (!started || +$("tt").value <= 0 || +$("tt").value >= P().T) { launch(); return }
+      if (+$("tt").value >= P().T) $("tt").value = 0; playing = true; $("play").textContent = "⏸ Pausar"; last = performance.now(); requestAnimationFrame(loop)
+    };
+    $("rst").onclick = () => { playing = false; started = false; $("tt").disabled = true; $("play").textContent = "▶ Ejecutar simulación"; $("tt").value = 0; scene(0) };
+    $("tt").oninput = () => scene(+$("tt").value);
+    function launch() {
+      clearInterval(cdi); playing = false; started = true; $("tt").disabled = false; $("tt").value = 0; cd = 3; scene(0); $("play").textContent = "⏳ Cuenta regresiva…";
+      cdi = setInterval(() => { cd--; if (cd <= 0) { clearInterval(cdi); cd = 0; playing = true; $("play").textContent = "⏸ Pausar"; last = performance.now(); requestAnimationFrame(loop) } else scene(0) }, 800)
+    }
+    ["a", "g", "k", "T", "tv", "th"].forEach(i => $(i).onchange = () => { render(); launch() });
+    const DS = [["a", "EMPUJE a = T/m", "m/s²", 0, 30, .1, "#ff8a3d"], ["g", "GRAVEDAD g", "m/s²", 0, 20, .01, "#6fd3ff"], ["k", "RESISTENCIA k", "1/s", 0, 1, .01, "#c792ff"], ["T", "TIEMPO FINAL", "s", 5, 60, 1, "#4be08a"]].map(a => ({ id: a[0], lab: a[1], u: a[2], mn: a[3], mx: a[4], st: a[5], col: a[6] }));
+    function drawDial(d) {
+      const c = d.cv.getContext("2d"), W = d.cv.width, R = W / 2, val = Math.max(d.mn, Math.min(d.mx, +$(d.id).value || 0)), a0 = .75 * Math.PI, sw = 1.5 * Math.PI, a = a0 + sw * (val - d.mn) / (d.mx - d.mn);
+      c.clearRect(0, 0, W, W); c.save(); c.translate(R, R);
+      const g = c.createLinearGradient(-R, -R, R, R); g.addColorStop(0, "#e4e7eb"); g.addColorStop(1, "#4b515b"); c.fillStyle = g; c.beginPath(); c.arc(0, 0, R - 2, 0, 7); c.fill();
+      c.fillStyle = "#12161b"; c.beginPath(); c.arc(0, 0, R - 9, 0, 7); c.fill();
+      c.lineWidth = 6; c.lineCap = "round"; c.strokeStyle = "#262c35"; c.beginPath(); c.arc(0, 0, R - 20, a0, a0 + sw); c.stroke();
+      c.strokeStyle = d.col; c.shadowColor = d.col; c.shadowBlur = 10; c.beginPath(); c.arc(0, 0, R - 20, a0, a); c.stroke(); c.shadowBlur = 0;
+      c.lineWidth = 1.5; c.strokeStyle = "#9aa3af"; for (let i = 0; i <= 10; i++) { const q = a0 + sw * i / 10; c.beginPath(); c.moveTo(Math.cos(q) * (R - 28), Math.sin(q) * (R - 28)); c.lineTo(Math.cos(q) * (R - 33), Math.sin(q) * (R - 33)); c.stroke() }
+      c.strokeStyle = "#fff"; c.lineWidth = 3; c.beginPath(); c.moveTo(0, 0); c.lineTo(Math.cos(a) * (R - 30), Math.sin(a) * (R - 30)); c.stroke();
+      const kg = c.createRadialGradient(-3, -3, 1, 0, 0, 10); kg.addColorStop(0, "#cfd4db"); kg.addColorStop(1, "#3b414a"); c.fillStyle = kg; c.beginPath(); c.arc(0, 0, 9, 0, 7); c.fill(); c.fillStyle = d.col; c.beginPath(); c.arc(0, 0, 3, 0, 7); c.fill();
+      c.textAlign = "center"; c.fillStyle = "#7dffa6"; c.font = "bold 13px monospace"; c.fillText(val.toFixed(d.st < .1 ? 2 : d.st < 1 ? 1 : 0), 0, R * .56); c.fillStyle = "#9fb0c0"; c.font = "10px system-ui"; c.fillText(d.u, 0, R * .56 + 13); c.restore()
+    }
+    function dialSet(d, e) { const r = d.cv.getBoundingClientRect(), a0 = .75 * Math.PI, sw = 1.5 * Math.PI; let u = (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) - a0) % (2 * Math.PI); if (u < 0) u += 2 * Math.PI; if (u > sw) u = u > sw + (2 * Math.PI - sw) / 2 ? 0 : sw; let v = d.mn + u / sw * (d.mx - d.mn); v = Math.round(v / d.st) * d.st; $(d.id).value = +v.toFixed(2); drawDial(d) }
+    DS.forEach(d => {
+      const w = document.createElement("div"); w.className = "dial"; d.cv = document.createElement("canvas"); d.cv.width = d.cv.height = 132; w.appendChild(d.cv); const l = document.createElement("div"); l.className = "dl"; l.textContent = d.lab; w.appendChild(l); $("dials").appendChild(w);
+      d.cv.onpointerdown = e => { d.drag = true; d.cv.setPointerCapture(e.pointerId); dialSet(d, e) }; d.cv.onpointermove = e => { if (d.drag) dialSet(d, e) }; d.cv.onpointerup = () => { if (d.drag) { d.drag = false; $(d.id).dispatchEvent(new Event("change")) } };
+      ["input", "change"].forEach(ev => $(d.id).addEventListener(ev, () => drawDial(d))); drawDial(d)
+    });
+    [["tv", "TOLERANCIA VELOCIDAD", "m/s", 0.1, 2, .1], ["th", "TOLERANCIA ALTURA", "m", 1, 20, .5]].forEach(a => {
+      const id = a[0], u = a[2], w = document.createElement("div"); w.className = "vs"; w.innerHTML = "<span>" + a[1] + "</span><input type=\"range\" class=\"vr\" min=\"" + a[3] + "\" max=\"" + a[4] + "\" step=\"" + a[5] + "\"><b></b>";
+      const r = w.querySelector("input"), b = w.querySelector("b"), n = $(id), sy = () => { r.value = n.value; b.textContent = (+n.value).toFixed(1) + " " + u }; r.oninput = () => { n.value = r.value; b.textContent = (+r.value).toFixed(1) + " " + u }; r.onchange = () => n.dispatchEvent(new Event("change"));["input", "change"].forEach(ev => n.addEventListener(ev, sy)); sy(); $("dials").appendChild(w)
+    });
+    function scene(t) {
+      const p = SP, cv = $("c3"), c = cv.getContext("2d"), W = cv.width, H = cv.height, gy = H - 46, now = performance.now() / 1000;
+      const [v, h] = interp(t), he = ex(t, p)[1], hmax = Math.max(ex(p.T, p)[1], R[R.length - 1].h) * 1.1, fr = Math.min(1, h / hmax);
+      const Y = a => gy - a / hmax * (gy - 90), x = W * 0.68, y = Y(h), mx = (a, b, f) => a.map((q, i) => Math.round(q + (b[i] - q) * f));
+      c.save(); const sh = playing && t > 0 && h < hmax * .08 ? 1.6 : 0; c.translate((Math.random() - .5) * sh, (Math.random() - .5) * sh);
+      const gr = c.createLinearGradient(0, 0, 0, gy); gr.addColorStop(0, "rgb(" + mx([20, 28, 66], [2, 3, 12], fr) + ")"); gr.addColorStop(1, "rgb(" + mx([84, 112, 176], [16, 22, 58], fr) + ")"); c.fillStyle = gr; c.fillRect(-4, -4, W + 8, H + 8);
+      for (let i = 0; i < 80; i++) { c.globalAlpha = (.2 + .8 * fr) * (.55 + .45 * Math.sin(now * 2 + i * 1.7)); c.fillStyle = "#fff"; c.fillRect((i * 137.5) % W, (i * 61.8) % (gy - 30), i % 7 ? 1.2 : 2, i % 7 ? 1.2 : 2) } c.globalAlpha = 1;
+      const mg = c.createRadialGradient(W - 76, 38, 3, W - 70, 44, 20); mg.addColorStop(0, "#f4f1e6"); mg.addColorStop(1, "#a9a69a"); c.fillStyle = mg; c.beginPath(); c.arc(W - 70, 42, 18, 0, 7); c.fill(); c.fillStyle = "rgba(120,118,108,.45)";[[-5, -3, 4], [6, 5, 3], [1, -8, 2.5]].forEach(q => { c.beginPath(); c.arc(W - 70 + q[0], 42 + q[1], q[2], 0, 7); c.fill() });
+      c.fillStyle = "rgba(235,240,250," + (.32 * (1 - fr)).toFixed(3) + ")";[[.1, 60], [.2, 300], [.3, 150], [.42, 340]].forEach((q, i) => { const cx = (q[1] + now * 6 * (i % 2 ? 1 : -1) + W * 4) % (W + 160) - 80, cy = Y(hmax * q[0]);[[0, 0, 34, 11], [22, -5, 26, 10], [-24, 3, 24, 9]].forEach(e => { c.beginPath(); c.ellipse(cx + e[0], cy + e[1], e[2], e[3], 0, 0, 7); c.fill() }) });
+      c.fillStyle = "#1b2438"; c.beginPath(); c.moveTo(0, gy);[[0, 30], [60, 62], [110, 34], [170, 70], [240, 36], [300, 58], [360, 30], [W, 46]].forEach(q => c.lineTo(q[0], gy - q[1])); c.lineTo(W, gy); c.fill();
+      const gg = c.createLinearGradient(0, gy, 0, H); gg.addColorStop(0, "#34423a"); gg.addColorStop(1, "#141a17"); c.fillStyle = gg; c.fillRect(0, gy, W, H - gy);
+      c.fillStyle = "#8a929e"; c.fillRect(x - 42, gy, 84, 7); c.fillStyle = "#4a515c"; c.fillRect(x - 42, gy + 7, 84, 5);
+      const tx = x - 70; c.strokeStyle = "#7b8492"; c.lineWidth = 2; c.strokeRect(tx, gy - 130, 12, 130); c.lineWidth = 1; c.beginPath(); for (let i = 0; i < 6; i++) { c.moveTo(tx, gy - 130 + i * 21.6); c.lineTo(tx + 12, gy - 130 + (i + 1) * 21.6); c.moveTo(tx + 12, gy - 130 + i * 21.6); c.lineTo(tx, gy - 130 + (i + 1) * 21.6) } c.stroke();
+      c.fillStyle = Math.sin(now * 4) > 0 ? "#ff4d4d" : "#5a1f1f"; c.beginPath(); c.arc(tx + 6, gy - 134, 3, 0, 7); c.fill(); if (h < 3) { c.fillStyle = "#7b8492"; c.fillRect(tx + 12, gy - 80, 40, 4) }
+      const gs = t > 0 ? Math.max(0, 1 - h / 70) : 0; if (gs > 0) { for (let k = 0; k < 12; k++) { const s = (k % 2 ? 1 : -1) * (10 + k * 9 + Math.min(t, 3) * 14); c.fillStyle = "rgba(220,224,232," + (.28 * gs * (1 - k / 14)).toFixed(3) + ")"; c.beginPath(); c.arc(x + s, gy - 6 - (k % 3) * 3, 10 + k * 2.4, 0, 7); c.fill() } }
+      if (t > 0) { const N = 26, dd = p.T / 120; for (let j = N; j >= 1; j--) { const tp = t - j * dd; if (tp < 0) continue; const hp = interp(tp)[1], a = 1 - j / N; c.fillStyle = j < 5 ? "rgba(255,170,70," + (.5 * a).toFixed(3) + ")" : "rgba(215,220,230," + (.42 * a).toFixed(3) + ")"; c.beginPath(); c.arc(x + Math.sin(j * 3.1 + now) * j * .7, Y(hp) + 10, 5 + j * 1.5, 0, 7); c.fill() } }
+      c.setLineDash([6, 4]); c.strokeStyle = "#9be29b"; c.lineWidth = 1.2; c.beginPath(); c.moveTo(184, Y(he)); c.lineTo(W - 26, Y(he)); c.stroke(); c.setLineDash([]); c.fillStyle = "#9be29b"; c.font = "11px system-ui"; c.fillText("▸ exacta", 186, Y(he) - 4);
+      const raw = hmax / 6, m2 = Math.pow(10, Math.floor(Math.log10(raw))), st = [1, 2, 5, 10].map(m => m * m2).find(s => s >= raw); c.strokeStyle = "#9fb0c0"; c.fillStyle = "#9fb0c0"; c.font = "10px system-ui"; c.textAlign = "right"; c.lineWidth = 1; c.beginPath(); c.moveTo(W - 16, Y(0)); c.lineTo(W - 16, Y(hmax));
+      for (let a = 0; a <= hmax; a += st) { c.moveTo(W - 16, Y(a)); c.lineTo(W - 8, Y(a)); c.fillText(+a.toFixed(2), W - 20, Y(a) + 3.5) } c.stroke(); c.textAlign = "left";
+      c.save(); c.translate(x, y);
+      if (t > 0) {
+        const L = 26 + v * .35 + Math.random() * 10, fl = (w, l, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(-w, 0); c.quadraticCurveTo(-w * .6, l * .6, 0, l); c.quadraticCurveTo(w * .6, l * .6, w, 0); c.closePath(); c.fill() };
+        const gl = c.createRadialGradient(0, 8, 2, 0, 8, 60); gl.addColorStop(0, "rgba(255,170,60,.45)"); gl.addColorStop(1, "rgba(255,170,60,0)"); c.fillStyle = gl; c.fillRect(-60, -52, 120, 120); fl(11, L, "rgba(255,110,30,.9)"); fl(7, L * .72, "#ffb703"); fl(3.5, L * .45, "#fff6c8")
+      }
+      c.fillStyle = "#3a3f48"; c.fillRect(-7, -4, 14, 6);
+      c.fillStyle = "#d6402f"; c.beginPath(); c.moveTo(-15, -22); c.lineTo(-31, 6); c.lineTo(-15, -4); c.closePath(); c.fill(); c.beginPath(); c.moveTo(15, -22); c.lineTo(31, 6); c.lineTo(15, -4); c.closePath(); c.fill();
+      const bg = c.createLinearGradient(-15, 0, 15, 0); bg.addColorStop(0, "#9aa3b0"); bg.addColorStop(.35, "#f4f6f8"); bg.addColorStop(1, "#8d96a3"); c.fillStyle = bg; c.fillRect(-15, -60, 30, 56);
+      c.fillStyle = "#e03b2f"; c.beginPath(); c.moveTo(-15, -60); c.quadraticCurveTo(-13, -84, 0, -96); c.quadraticCurveTo(13, -84, 15, -60); c.closePath(); c.fill();
+      c.fillStyle = "#2b3240"; c.fillRect(-15, -20, 30, 5); c.fillStyle = "#6fd3ff"; c.fillRect(-15, -13, 30, 2);
+      c.fillStyle = "#454c58"; c.beginPath(); c.arc(0, -42, 9, 0, 7); c.fill(); c.fillStyle = "#5cc8ff"; c.beginPath(); c.arc(0, -42, 7, 0, 7); c.fill(); c.fillStyle = "#eef1f5"; c.beginPath(); c.arc(0, -41, 4.5, 0, 7); c.fill(); c.fillStyle = "#1b2a44"; c.beginPath(); c.arc(0, -41, 3, 0, 7); c.fill();
+      c.restore(); c.restore();
+      const ve = ex(t, p)[0], L = [["Valores iniciales", 1], ["v₀ = 0 m/s   h₀ = 0 m"], ["a = " + p.a + " m/s²   g = " + p.g + " m/s²"], ["k = " + p.k + " 1/s"], ["Δt = " + dt + " s · " + NAMES[method]], ["Valores en tiempo real", 1], ["t = " + fmt(t, 2) + " s"], ["v = " + fmt(v, 2) + " m/s"], ["h = " + fmt(h, 2) + " m"], ["v exacta = " + fmt(ve, 2) + " m/s"], ["Error de h = " + fmt(Math.abs(h - he), 2) + " m"]];
+      c.fillStyle = "rgba(14,18,24,.8)"; c.fillRect(6, 6, 172, L.length * 17 + 10); c.strokeStyle = "#ffd27a"; c.lineWidth = 1.5; c.strokeRect(6, 6, 172, L.length * 17 + 10);
+      L.forEach((l, i) => { c.fillStyle = l[1] ? "#ffd27a" : "#e8ebef"; c.font = (l[1] ? "bold " : "") + "12px system-ui"; c.fillText(l[0], 12, 22 + i * 17) });
+      if (!started) { c.fillStyle = "#fff"; c.font = "bold 12px system-ui"; c.textAlign = "center"; c.fillText("Elige método y paso", W * .68, gy - 170); c.fillText("o pulsa «Ejecutar»", W * .68, gy - 152); c.textAlign = "left" }
+      if (started && cd > 0) { c.save(); c.shadowColor = "#ff8a3d"; c.shadowBlur = 24; c.fillStyle = "#ffb703"; c.font = "bold 84px Orbitron,system-ui"; c.textAlign = "center"; c.fillText(cd, W * .68, gy - 170); c.restore() }
+      const vm = Math.max(ex(p.T, p)[0], R[R.length - 1].v) * 1.1; gauge("g1", v, vm, "VEL m/s"); gauge("g2", h, hmax, "ALT m"); $("l1").className = "lamp" + (playing || cd > 0 ? " y" : "");
+      $("lt").textContent = fmt(t, 2) + " s"; $("lv").textContent = fmt(v, 2) + " m/s"; $("lh").textContent = fmt(h, 2) + " m";
+    }
+    render(); launch();
+  </script>
+</body>
+
+</html>
